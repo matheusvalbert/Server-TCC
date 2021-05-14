@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../database/mysql');
 const authConfig = require('../config/auth');
+const authMiddleware = require('../middlewares/auth');
 
 function generateToken(id = {}) {
   return jwt.sign({ id }, authConfig.secret);
@@ -54,5 +55,21 @@ router.post('/login', async (req, res) => {
     }
   });
 });
+
+router.use(authMiddleware).post('/reset', async (req, res) => {
+
+  const password = req.body.password;
+
+  await bcrypt.hash(password, 10).then((psw) => {
+    db.query('UPDATE user SET password = ? WHERE id = ?',
+    [psw, req.userId],
+    (err, result) => {
+      if(err)
+        return res.status(400).send({ error: err });
+      else
+        res.send({ result });
+    });
+  });
+})
 
 module.exports = app => app.use('/auth', router);
