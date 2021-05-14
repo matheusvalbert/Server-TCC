@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
   });
 });
 
-router.use(authMiddleware).post('/reset', async (req, res) => {
+router.use(authMiddleware).patch('/reset', async (req, res) => {
 
   const password = req.body.password;
 
