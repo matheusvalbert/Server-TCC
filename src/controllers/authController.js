@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../database/mysql');
 const authConfig = require('../config/auth');
@@ -10,30 +10,30 @@ function generateToken(id = {}) {
   return jwt.sign({ id }, authConfig.secret);
 }
 
-router.post('/register', async (req, res) => {
+router.post('/register', (req, res) => {
 
-  const login = req.body.login;
+  const username = req.body.username;
   const password = req.body.password;
 
-  await bcrypt.hash(password, 10).then((psw) => {
-    db.query('INSERT INTO user (login, password) VALUES (?, ?)',
-    [login, psw],
+  bcrypt.hash(password, 10).then((psw) => {
+    db.query('INSERT INTO users (username, password) VALUES (?, ?)',
+    [username, psw],
     (err, result) => {
       if(err)
-        return res.status(400).send({ error: err });
+        return res.status(400).send({ insertedUser: false });
       else
-        return res.send({ result });
+        return res.send({ insertedUser: true });
     });
   });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', (req, res) => {
 
-  const login = req.body.login;
+  const username = req.body.username;
   const password = req.body.password;
 
-  db.query('SELECT * FROM user WHERE login = ?',
-  [login],
+  db.query('SELECT * FROM users WHERE username = ?',
+  [username],
   async (err, result) => {
     if(err)
       return res.status(400).send({ error: err });
@@ -44,32 +44,44 @@ router.post('/login', async (req, res) => {
         if(!await bcrypt.compare(password, result[0].password))
           return res.status(400).send({ error: 'Senha incorreta' });
         else {
-
-          const id = result[0].id;
-
-          return res.send({
-            result,
-            token: generateToken(id)
-          });
+          const uid = result[0].uid;
+          const username = result[0].username;
+          const token = generateToken(uid);
+          return res.send({ uid, username, token });
         }
     }
   });
 });
 
-router.use(authMiddleware).patch('/reset', async (req, res) => {
+router.use(authMiddleware).patch('/reset', (req, res) => {
 
-  const password = req.body.password;
+  const oldPassword = req.body.oldPassword;
+  const newPassword = req.body.newPassword;
 
-  await bcrypt.hash(password, 10).then((psw) => {
-    db.query('UPDATE user SET password = ? WHERE id = ?',
-    [psw, req.userId],
-    (err, result) => {
-      if(err)
-        return res.status(400).send({ error: err });
+  db.query('SELECT * FROM users WHERE uid = ?',
+  [req.userId],
+  async (err, result) => {
+    if(err)
+      return res.status(400).send({ error: 'senha incorreta' });
+    else
+      if(!await bcrypt.compare(oldPassword, result[0].password))
+        return res.status(400).send({ error: 'Senha incorreta' });
       else
-        res.send({ result });
-    });
-  });
+        bcrypt.hash(newPassword, 10).then((psw) => {
+          db.query('UPDATE users SET password = ? WHERE uid = ?',
+          [psw, req.userId],
+          (err, result) => {
+            if(err)
+              return res.status(400).send({ error: 'falha na troca de senha' });
+            else
+              res.send({ passwordChanged: true });
+          });
+        });
+  })
+})
+
+router.use(authMiddleware).post('/validate', (req, res) => {
+  res.send({ validToken: 'true', uid: req.userId });
 })
 
 module.exports = app => app.use('/auth', router);
