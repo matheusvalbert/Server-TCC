@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 const db = require('../database/mysql');
 const authConfig = require('../config/auth');
 const authMiddleware = require('../middlewares/auth');
+const cors = require('cors');
+
+router.use(cors());
 
 function generateToken(id = {}) {
   return jwt.sign({ id }, authConfig.secret);
