@@ -3,32 +3,14 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../database/mysql');
-const authConfig = require('../config/auth');
 const authMiddleware = require('../middlewares/auth');
-const cors = require('cors');
-
-router.use(cors());
+const authConfig = require('../config/auth');
 
 function generateToken(id = {}) {
   return jwt.sign({ id }, authConfig.secret);
 }
 
-router.post('/register', (req, res) => {
-
-  const username = req.body.username;
-  const password = req.body.password;
-
-  bcrypt.hash(password, 10).then((psw) => {
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)',
-    [username, psw],
-    (err, result) => {
-      if(err)
-        return res.status(400).send({ insertedUser: false });
-      else
-        return res.send({ insertedUser: true });
-    });
-  });
-});
+//not auth routes
 
 router.post('/login', (req, res) => {
 
@@ -56,7 +38,70 @@ router.post('/login', (req, res) => {
   });
 });
 
-router.use(authMiddleware).patch('/reset', (req, res) => {
+//auth Routes
+router.use(authMiddleware);
+
+router.get('/getUsers', (req, res) => {
+
+  db.query('SELECT username, uid FROM users',
+  (err, result) => {
+    try {
+      id = [];
+      user = [];
+      for(i = 1;  i < result.length; i++) {
+        id.push(result[i].uid);
+        user.push(result[i].username);
+      }
+      const users = ({ id, user });
+      res.send({ users });
+    }
+    catch(error) {
+      res.status(400).send(error);
+    }
+  });
+});
+
+router.patch('/masterReset', (req, res) => {
+
+  const username = req.body.username;
+  const newPassword = req.body.newPassword;
+
+  if(req.userId !== 1 && username !== 'admin')
+    return res.status(400).send({ insertedUser: 'not authorized' });
+
+  bcrypt.hash(newPassword, 10).then((psw) => {
+    db.query('UPDATE users SET password = ? WHERE username = ?',
+    [psw, username],
+    (err, result) => {
+      if(err)
+        return res.status(400).send({ error: 'falha na troca de senha' });
+      else
+        res.send({ passwordChanged: true });
+    });
+  });
+});
+
+router.post('/register', (req, res) => {
+
+  if(req.userId !== 1)
+    return res.status(400).send({ insertedUser: 'not authorized' });
+
+  const username = req.body.username;
+  const password = req.body.password;
+
+  bcrypt.hash(password, 10).then((psw) => {
+    db.query('INSERT INTO users (username, password) VALUES (?, ?)',
+    [username, psw],
+    (err, result) => {
+      if(err)
+        return res.status(400).send({ insertedUser: false });
+      else
+        return res.send({ insertedUser: true });
+    });
+  });
+});
+
+router.patch('/reset', (req, res) => {
 
   const oldPassword = req.body.oldPassword;
   const newPassword = req.body.newPassword;
@@ -83,7 +128,7 @@ router.use(authMiddleware).patch('/reset', (req, res) => {
   })
 })
 
-router.use(authMiddleware).post('/validate', (req, res) => {
+router.post('/validate', (req, res) => {
   res.send({ validToken: 'true', uid: req.userId });
 })
 
