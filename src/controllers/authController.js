@@ -31,9 +31,8 @@ router.post('/login', (req, res) => {
         else {
           const uid = result[0].uid;
           const username = result[0].username;
-          const number = result[0].number;
           const token = generateToken(uid);
-          return res.send({ uid, username, number, token });
+          return res.send({ uid, username, token });
         }
     }
   });
