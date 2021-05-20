@@ -31,8 +31,9 @@ router.post('/login', (req, res) => {
         else {
           const uid = result[0].uid;
           const username = result[0].username;
+          const number = result[0].number;
           const token = generateToken(uid);
-          return res.send({ uid, username, token });
+          return res.send({ uid, username, number, token });
         }
     }
   });
@@ -53,13 +54,32 @@ router.get('/getUsers', (req, res) => {
         user.push(result[i].username);
       }
       const users = ({ id, user });
-      res.send({ users });
+      return res.send({ users });
     }
     catch(error) {
-      res.status(400).send(error);
+      return res.status(400).send(error);
     }
   });
 });
+
+router.delete('/delete', (req, res) => {
+
+  if(req.userId !== 1 && username !== 'admin')
+    return res.status(400).send({ insertedUser: 'not authorized' });
+
+  const username = req.body.username;
+
+  console.log(req.body.username);
+
+  db.query('DELETE FROM users WHERE username = ?',
+  [username],
+  (err, result) =>{
+    if(err)
+      return res.status(400).send({ error: 'falha ao apagar usuario' });
+    else
+      return res.send({ userDeleted: true });
+  });
+})
 
 router.patch('/masterReset', (req, res) => {
 
@@ -76,7 +96,7 @@ router.patch('/masterReset', (req, res) => {
       if(err)
         return res.status(400).send({ error: 'falha na troca de senha' });
       else
-        res.send({ passwordChanged: true });
+        return res.send({ passwordChanged: true });
     });
   });
 });
@@ -88,10 +108,11 @@ router.post('/register', (req, res) => {
 
   const username = req.body.username;
   const password = req.body.password;
+  const number = req.body.number;
 
   bcrypt.hash(password, 10).then((psw) => {
-    db.query('INSERT INTO users (username, password) VALUES (?, ?)',
-    [username, psw],
+    db.query('INSERT INTO users (username, password, number) VALUES (?, ?, ?)',
+    [username, psw, number],
     (err, result) => {
       if(err)
         return res.status(400).send({ insertedUser: false });
@@ -122,14 +143,14 @@ router.patch('/reset', (req, res) => {
             if(err)
               return res.status(400).send({ error: 'falha na troca de senha' });
             else
-              res.send({ passwordChanged: true });
+              return res.send({ passwordChanged: true });
           });
         });
   })
 })
 
 router.post('/validate', (req, res) => {
-  res.send({ validToken: 'true', uid: req.userId });
+  return res.send({ validToken: 'true', uid: req.userId });
 })
 
 module.exports = app => app.use('/auth', router);
