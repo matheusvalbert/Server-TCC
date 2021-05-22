@@ -11,7 +11,11 @@
         "falha",
         "incorreta",
         "middlewares",
+        "morador",
+        "moradores",
+        "originalname",
         "rio",
         "troca"
-    ]
+    ],
+    "python.pythonPath": "/usr/local/bin/python3"
 }

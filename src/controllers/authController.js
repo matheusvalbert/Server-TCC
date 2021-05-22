@@ -68,8 +68,6 @@ router.delete('/delete', (req, res) => {
 
   const username = req.body.username;
 
-  console.log(req.body.username);
-
   db.query('DELETE FROM users WHERE username = ?',
   [username],
   (err, result) =>{
