@@ -8,6 +8,9 @@ const multerConfig = require('../config/multer');
 const path =  require('path').join(__dirname, '..', '/img/');
 const fs = require('fs');
 
+router.use(authMiddleware);
+router.use(moradorMiddleware);
+
 router.get('/profileImage/:imgName', (req, res) => {
 
   try {
@@ -20,9 +23,6 @@ router.get('/profileImage/:imgName', (req, res) => {
     return res.status(400).send({ error: err });
   }
 });
-
-router.use(authMiddleware);
-router.use(moradorMiddleware);
 
 router.put('/completeModify', multer(multerConfig).single('file'), (req, res) => {
 
