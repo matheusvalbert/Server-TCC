@@ -15,7 +15,9 @@
         "moradores",
         "originalname",
         "rio",
-        "troca"
+        "troca",
+        "visitante",
+        "visitantes"
     ],
     "python.pythonPath": "/usr/local/bin/python3"
 }

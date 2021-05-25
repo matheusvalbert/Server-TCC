@@ -30,21 +30,21 @@ router.put('/completeModify', multer(multerConfig).single('file'), (req, res) =>
   const plate = req.body.plate;
   const uid = req.body.uid;
 
-  db.query('SELECT * FROM moradores WHERE uid = ?',
+  db.query('SELECT * FROM visitantes WHERE uid = ?',
   [uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status.send({ error: 'fail to get visitantes' });
     else {
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
       });
-      db.query('UPDATE moradores SET name = ?, plate = ?, img_name = ? WHERE uid = ?',
+      db.query('UPDATE visitantes SET name = ?, plate = ?, img_name = ? WHERE uid = ?',
       [name, plate, req.file.filename, uid],
       (err, result) => {
         if(err)
-          return res.status.send({ error: 'fail to get moradores' });
+          return res.status.send({ error: 'fail to get visitantes' });
         else {
           return res.send({ completeModify: true });
         }
@@ -59,11 +59,11 @@ router.patch('/modify', (req, res) => {
   const plate = req.body.plate;
   const uid = req.body.uid;
 
-  db.query('UPDATE moradores SET name = ?, plate = ? WHERE uid = ?',
+  db.query('UPDATE visitantes SET name = ?, plate = ? WHERE uid = ?',
   [name, plate, uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status.send({ error: 'fail to get visitantes' });
     else {
       return res.send({ modify: true });
     }
@@ -74,23 +74,23 @@ router.delete('/delete', (req, res) => {
 
   const uid = req.body.uid;
 
-  db.query('SELECT * FROM moradores WHERE uid = ?',
+  db.query('SELECT * FROM visitantes WHERE uid = ?',
   [uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status.send({ error: 'fail to get visitantes' });
     else {
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
       });
-      db.query('DELETE FROM moradores WHERE uid = ?',
+      db.query('DELETE FROM visitantes WHERE uid = ?',
       [uid],
       (err, result) =>{
         if(err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
         else
-          return res.send({ moradorDeleted: true });
+          return res.send({ visitanteDeleted: true });
       });
     }
   });
@@ -102,7 +102,7 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
   const plate = req.body.plate;
 
   if(req.file && name !== undefined)
-    db.query('INSERT INTO moradores (name, plate, img_name, number) VALUES (?, ?, ?, ?)',
+    db.query('INSERT INTO visitantes (name, plate, img_name, number) VALUES (?, ?, ?, ?)',
     [name, plate, req.file.filename, req.number],
     (err, result) =>{
       if(err)
@@ -116,14 +116,14 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
 
 router.get('/getUsers', (req, res) => {
 
-  db.query('SELECT * FROM moradores WHERE number = ?',
+  db.query('SELECT * FROM visitantes WHERE number = ?',
   [req.number],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status.send({ error: 'fail to get visitantes' });
     else
       return res.send({ result: result });
   });
 });
 
-module.exports = app => app.use('/morador', router);
+module.exports = app => app.use('/visitante', router);
