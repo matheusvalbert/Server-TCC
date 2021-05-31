@@ -84,13 +84,18 @@ router.delete('/delete', (req, res) => {
         if (err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
       });
-      db.query('DELETE FROM visitantes WHERE uid = ?',
+      db.query('DELETE FROM visitas WHERE visitantes_uid = ?',
       [uid],
-      (err, result) =>{
+      (err, result) => {
         if(err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
-        else
-          return res.send({ visitanteDeleted: true });
+        else {
+          db.query('DELETE FROM visitantes WHERE uid = ?',
+          [uid],
+          (err, result) => {
+            return res.send({ visitanteDeleted: true });
+          });
+        };
       });
     }
   });
@@ -104,11 +109,19 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
   if(req.file && name !== undefined)
     db.query('INSERT INTO visitantes (name, plate, img_name, number) VALUES (?, ?, ?, ?)',
     [name, plate, req.file.filename, req.number],
-    (err, result) =>{
+    (err, result) => {
       if(err)
         return res.status(400).send({ insertedUser: false });
-      else
-        return res.send({ insertedUser: true });
+      else {
+        db.query('INSERT INTO visitas (visitantes_uid, type, text, number) VALUES (?, ?, ?, ?)',
+        [result.insertId, 'none', 'Aguardando Cadastro', req.number],
+        (err, result) => {
+          if(err)
+            return res.status(400).send({ insertedUser: false });
+          else
+            return res.send({ insertedUser: true });
+        });
+      }
     });
   else
     return res.status(400).send({ error: 'image not found' });

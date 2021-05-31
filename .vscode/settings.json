@@ -1,12 +1,15 @@
 {
     "cSpell.words": [
+        "Aguardando",
         "Erro",
         "Matheus",
         "Senha",
         "Usu",
         "Usuário",
         "Valbert",
+        "Visita",
         "apagar",
+        "cadastro",
         "existe",
         "falha",
         "incorreta",
@@ -17,7 +20,8 @@
         "rio",
         "troca",
         "visitante",
-        "visitantes"
+        "visitantes",
+        "visitas"
     ],
     "python.pythonPath": "/usr/local/bin/python3"
 }
