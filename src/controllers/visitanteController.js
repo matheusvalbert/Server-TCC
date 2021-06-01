@@ -114,7 +114,7 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
         return res.status(400).send({ insertedUser: false });
       else {
         db.query('INSERT INTO visitas (visitantes_uid, type, text, number) VALUES (?, ?, ?, ?)',
-        [result.insertId, 'none', 'Aguardando Cadastro', req.number],
+        [result.insertId, 'Nenhuma', 'Aguardando cadastro', req.number],
         (err, result) => {
           if(err)
             return res.status(400).send({ insertedUser: false });
