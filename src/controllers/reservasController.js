@@ -44,6 +44,7 @@ router.delete('/deleteLocal', (req, res) => {
 router.get('/getLocal', (req, res) => {
 
   db.query('SELECT * FROM ambientes',
+  [],
   (err, result) => {
     if(err)
       return res.status(400).send({ getLocal: false });
@@ -61,6 +62,18 @@ router.get('/getLocal', (req, res) => {
 
       return res.send({ result: results });
     }
+  });
+});
+
+router.get('/getAmbientes', (req, res) => {
+
+  db.query('SELECT * FROM ambientes',
+  [],
+  (err, result) => {
+    if(err)
+      return res.status(400).send({ getAmbientes: false });
+    else
+      return res.send({ result: result });
   });
 });
 
