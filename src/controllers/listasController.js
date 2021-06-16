@@ -58,8 +58,15 @@ router.delete('/delete', (req, res) => {
   (err, result) => {
     if(err)
       return res.status(400).send({ error: 'fail to delete' });
-    else
+    else {
+      db.query('DELETE FROM reserva_ambientes WHERE lista_uid = ?',
+      [uid],
+      (error, results) => {
+        if(err)
+          return res.status(400).send({ error: 'fail to delete' });
+      })
       return res.send({ deleted: true });
+    }
   });
 });
 

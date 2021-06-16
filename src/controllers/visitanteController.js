@@ -73,6 +73,28 @@ router.patch('/modify', (req, res) => {
 router.delete('/delete', (req, res) => {
 
   const uid = req.body.uid;
+  var flag = 0;
+
+  db.query('SELECT * FROM listas',
+  [],
+  (err, result) => {
+    if(err)
+      return res.status(400).send({ error: 'fail to get lists' });
+    else {
+      for(var i = 0; i < result.length; i++) {
+        result[i].ids.split(',').forEach((item, index) => {
+          if(uid == item) {
+            db.query('UPDATE listas SET ids = ? WHERE uid = ?',
+            [result[i].ids.split`,`.filter(selected => selected !== uid.toString()).toString(), result[i].uid],
+            (error, results) => {
+            if(error)
+              return res.status(400).send({ error: 'fail to delete from lists' });
+            });
+          }
+        });
+      }
+    }
+  });
 
   db.query('SELECT * FROM visitantes WHERE uid = ?',
   [uid],
