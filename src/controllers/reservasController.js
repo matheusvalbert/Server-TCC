@@ -4,6 +4,38 @@ const db = require('../database/mysql');
 const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
 
+router.get('/getReservas', (req, res) => {
+
+  db.query('SELECT * FROM ambientes',
+  [],
+  (err, ambientes_nome) => {
+    if(err)
+      return res.status(400).send({ err: err });
+    else {
+      db.query('SELECT * FROM reserva_ambientes',
+      [],
+      (err, reserva) => {
+        if(err)
+          return res.status(400).send({ err: err });
+        else {
+          const ambientes = [];
+          const dates = [];
+          const number = [];
+          reserva.forEach(reserva => {
+            ambientes_nome.forEach(ambientes_nome => {
+              if(reserva.ambiente_uid === ambientes_nome.uid)
+                ambientes.push(ambientes_nome.name);
+            });
+            dates.push(reserva.date);
+            number.push('Número: '.concat(reserva.number));
+          });
+          return res.send({ ambientes: ambientes, datas: dates, number: number });
+        }
+      });
+    }
+  });
+});
+
 router.use(authMiddleware);
 router.use(userMiddleware);
 
@@ -128,8 +160,6 @@ router.patch('/updateReservaAmbiente', (req, res) => {
   const lista_uid = req.body.lista_uid;
   const date = req.body.date;
 
-  console.log(lista_uid, date);
-
   db.query('UPDATE reserva_ambientes SET lista_uid = ? WHERE date = ? AND number = ?',
   [lista_uid, date, req.number],
   (err, result) => {
@@ -138,7 +168,6 @@ router.patch('/updateReservaAmbiente', (req, res) => {
     else
       res.send({ updateReservaAmbiente: true });
   });
-
 });
 
 module.exports = app => app.use('/reservas', router);

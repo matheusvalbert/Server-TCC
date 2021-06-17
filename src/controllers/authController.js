@@ -68,13 +68,45 @@ router.delete('/delete', (req, res) => {
 
   const username = req.body.username;
 
-  db.query('DELETE FROM users WHERE username = ?',
+  db.query('SELECT uid FROM users WHERE username = ?',
   [username],
-  (err, result) =>{
+  (err, uid) => {
     if(err)
-      return res.status(400).send({ error: 'falha ao apagar usuario' });
-    else
-      return res.send({ userDeleted: true });
+      return res.status(400).send({ err: err });
+    else {
+      db.query('SELECT number FROM users WHERE uid = ?',
+      [uid[0].uid],
+      (err, number) => {
+        if(err)
+          return res.status(400).send({ err: err });
+        else {
+          db.query('DELETE FROM users WHERE username = ?',
+          [username],
+          (err, result) => {
+            if(err)
+              return res.status(400).send({ err: err });
+            else {
+              db.query('SELECT * FROM users WHERE number = ?',
+              [number[0].number],
+              (err, result1) => {
+                if(err)
+                  return res.status(400).send({ err: err });
+                else {
+                  if(result1.length === 0) {
+                    db.query('DELETE FROM listas WHERE number = ?', [number[0].number]);
+                    db.query('DELETE FROM moradores WHERE number = ?', [number[0].number]);
+                    db.query('DELETE FROM reserva_ambientes WHERE number = ?', [number[0].number]);
+                    db.query('DELETE FROM visitantes WHERE number = ?', [number[0].number]);
+                    db.query('DELETE FROM visitas WHERE number = ?', [number[0].number]);
+                  }
+                  return res.send({ userDeleted: true });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
   });
 })
 
