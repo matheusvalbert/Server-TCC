@@ -5,7 +5,7 @@ const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
 const multer = require('multer');
 const multerConfig = require('../config/multer');
-const path =  require('path').join(__dirname, '..', '/img/');
+const path = require('path').join(__dirname, '..', '/img/');
 const fs = require('fs');
 
 router.use(authMiddleware);
