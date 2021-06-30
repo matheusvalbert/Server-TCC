@@ -34,7 +34,7 @@ router.put('/completeModify', multer(multerConfig).single('file'), (req, res) =>
   [uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status(400).send({ error: 'fail to get moradores' });
     else {
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
@@ -44,7 +44,7 @@ router.put('/completeModify', multer(multerConfig).single('file'), (req, res) =>
       [name, plate, req.file.filename, uid],
       (err, result) => {
         if(err)
-          return res.status.send({ error: 'fail to get moradores' });
+          return res.status(400).send({ error: 'fail to get moradores' });
         else {
           return res.send({ completeModify: true });
         }
@@ -63,7 +63,7 @@ router.patch('/modify', (req, res) => {
   [name, plate, uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status(400).send({ error: 'fail to get moradores' });
     else {
       return res.send({ modify: true });
     }
@@ -78,7 +78,7 @@ router.delete('/delete', (req, res) => {
   [uid],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status(400).send({ error: 'fail to get moradores' });
     else {
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
@@ -100,6 +100,7 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
 
   const name = req.body.name;
   const plate = req.body.plate;
+  console.log(req.file);
 
   if(req.file && name !== undefined)
     db.query('INSERT INTO moradores (name, plate, img_name, number) VALUES (?, ?, ?, ?)',
@@ -120,7 +121,7 @@ router.get('/getUsers', (req, res) => {
   [req.number],
   (err, result) => {
     if(err)
-      return res.status.send({ error: 'fail to get moradores' });
+      return res.status(400).send({ error: 'fail to get moradores' });
     else
       return res.send({ result: result });
   });
