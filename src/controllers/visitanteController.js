@@ -7,6 +7,7 @@ const multer = require('multer');
 const multerConfig = require('../config/multer');
 const path =  require('path').join(__dirname, '..', '/img/');
 const fs = require('fs');
+const faceRecognition = require('../recognition/initFace');
 
 router.use(authMiddleware);
 router.use(userMiddleware);
@@ -30,12 +31,18 @@ router.put('/completeModify', multer(multerConfig).single('file'), (req, res) =>
   const plate = req.body.plate;
   const uid = req.body.uid;
 
+  faceRecognition.stdin.write(`{"face": "${false}", "new": "${req.file.filename}", "delete": "${false}"}\n`);
+  faceRecognition.stdin.pause();
+
   db.query('SELECT * FROM visitantes WHERE uid = ?',
   [uid],
   (err, result) => {
     if(err)
       return res.status(400).send({ error: 'fail to get visitantes' });
     else {
+      faceRecognition.stdin.write(`{"face": "${false}", "new": "${false}", "delete": "${result[0].img_name}"}\n`);
+      faceRecognition.stdin.pause();
+
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
@@ -102,6 +109,9 @@ router.delete('/delete', (req, res) => {
     if(err)
       return res.status(400).send({ error: 'fail to get visitantes' });
     else {
+      faceRecognition.stdin.write(`{"face": "${false}", "new": "${false}", "delete": "${result[0].img_name}"}\n`);
+      faceRecognition.stdin.pause();
+
       fs.unlink(path + result[0].img_name, (err) => {
         if (err)
           return res.status(400).send({ error: 'falha ao apagar usuario' });
@@ -127,6 +137,9 @@ router.post('/add', multer(multerConfig).single('file'), (req, res) => {
 
   const name = req.body.name;
   const plate = req.body.plate;
+
+  faceRecognition.stdin.write(`{"face": "${false}", "new": "${req.file.filename}", "delete": "${false}"}\n`);
+  faceRecognition.stdin.pause();
 
   if(req.file && name !== undefined)
     db.query('INSERT INTO visitantes (name, plate, img_name, number) VALUES (?, ?, ?, ?)',

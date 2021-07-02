@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 const db = require('../database/mysql');
 const authMiddleware = require('../middlewares/auth');
 const authConfig = require('../config/auth');
+const path = require('path').join(__dirname, '..', '/img/');
+const fs = require('fs');
+const faceRecognition = require('../recognition/initFace');
 
 function generateToken(id = {}) {
   return jwt.sign({ id }, authConfig.secret);
@@ -93,6 +96,39 @@ router.delete('/delete', (req, res) => {
                   return res.status(400).send({ err: err });
                 else {
                   if(result1.length === 0) {
+                    db.query('SELECT * FROM moradores WHERE number = ?',
+                    [number[0].number],
+                    (err, img) => {
+                      if(err)
+                        return res.status(400).send({ err: err });
+                      else {
+                        for(var i = 0; i < img.length; i++) {
+                          faceRecognition.stdin.write(`{"face": "${false}", "new": "${false}", "delete": "${img[i].img_name}"}\n`);
+                          faceRecognition.stdin.pause();
+                          fs.unlink(path + img[i].img_name, (err) => {
+                            if (err)
+                              return res.status(400).send({ error: 'falha ao apagar imagens' });
+                          });
+                        }
+                      }
+                    });
+                    db.query('SELECT * FROM visitantes WHERE number = ?',
+                    [number[0].number],
+                    (err, img) => {
+                      if(err)
+                        return res.status(400).send({ err: err });
+                      else {
+                        for(var i = 0; i < img.length; i++) {
+                          faceRecognition.stdin.write(`{"face": "${false}", "new": "${false}", "delete": "${img[i].img_name}"}\n`);
+                          faceRecognition.stdin.pause();
+                          fs.unlink(path + img[i].img_name, (err) => {
+                            if (err)
+                              return res.status(400).send({ error: 'falha ao apagar imagens' });
+                          });
+                        }
+                      }
+                    });
+
                     db.query('DELETE FROM listas WHERE number = ?', [number[0].number]);
                     db.query('DELETE FROM moradores WHERE number = ?', [number[0].number]);
                     db.query('DELETE FROM reserva_ambientes WHERE number = ?', [number[0].number]);
