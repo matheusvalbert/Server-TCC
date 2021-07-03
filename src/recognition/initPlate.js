@@ -1,3 +1,4 @@
+/*
 const { spawn } = require('child_process');
 
 const plateRecognition = spawn('python3', ['src/recognition/plate.py']);
@@ -17,3 +18,4 @@ plateRecognition.on('close', (code) => {
 plateRecognition.Promise = global.Promise;
 
 module.exports = plateRecognition;
+*/

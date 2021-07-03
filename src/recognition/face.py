@@ -16,7 +16,7 @@ def base64decode(img):
 
 def removeFace(file):
     try:
-        deleteFace = file.split('.')[0]
+        deleteFace = file
         index = knownNames.index(deleteFace)
         knownEncodings.pop(index)
         knownNames.pop(index)
@@ -28,16 +28,19 @@ def addFace(file):
     try:
         img_enc = face_recognition.face_encodings(img)[0]
         knownEncodings.append(img_enc)
-        knownNames.append(file.split('.')[0])
+        knownNames.append(file)
     except:
         pass
 
-for file in os.listdir('./src/img'):
-    if not file.startswith('.'):
-        img = cv2.imread('./src/img/' + file)
-        img_enc = face_recognition.face_encodings(img)[0]
-        knownEncodings.append(img_enc)
-        knownNames.append(file.split('.')[0])
+try:
+    for file in os.listdir('./src/img'):
+        if not file.startswith('.'):
+            img = cv2.imread('./src/img/' + file)
+            img_enc = face_recognition.face_encodings(img)[0]
+            knownEncodings.append(img_enc)
+            knownNames.append(file)
+except:
+    pass
 
 while True:
     jsonFile = input()
@@ -49,7 +52,7 @@ while True:
         if len(knownNames) > 0:
             face = base64decode(face)
             face = face[:, :, ::-1]
-            name = ''
+            name = 'false'
 
             faceLocations = face_recognition.face_locations(face)
             faceEncodings = face_recognition.face_encodings(face, faceLocations)
@@ -64,6 +67,12 @@ while True:
                     name = knownNames[bestMatchIndex]
             print(name)
     elif newFace != 'false':
-        addFace(newFace)
+        try:
+            addFace(newFace)
+        except:
+            pass
     else:
-        removeFace(deleteFace)
+        try:
+            removeFace(deleteFace)
+        except:
+            pass
