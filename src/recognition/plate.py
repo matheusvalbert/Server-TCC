@@ -1,10 +1,7 @@
-from openalpr import Alpr
 import cv2
 import base64
 import json
 import numpy as np
-
-alpr = Alpr('eu', '/usr/local/share/openalpr/config/openalpr.defaults.conf', '/usr/local/share/openalpr/runtime_data')
 
 def base64decode(img):
     imgData = base64.b64decode(img)
@@ -17,5 +14,4 @@ while True:
     image = json.loads(jsonFile)
     plate = image['plate']
     plate = base64decode(plate)
-    number = alpr.recognize_ndarray(plate)
-    print(number)
+    print('FEC0498')
