@@ -325,8 +325,8 @@ router.post('/face', (req, res) => {
         if(visita === false) {
           var currentDate = new Date();
           var dateTime = currentDate.getFullYear() + '-'
-          + ((currentDate.getMonth() + 1) < 10 ? '0' + (currentDate.getMonth() + 1) : (currentDate.getMonth() + 1))
-          + '-' + (currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate());
+          + (currentDate.getMonth() + 1).padStart(2, '0')
+          + '-' + currentDate.getDate().padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryFace(visitante.name, visitante.number, visitante.type);
@@ -382,8 +382,8 @@ router.post('/plate', (req, res) => {
         if(visita === false) {
           var currentDate = new Date();
           var dateTime = currentDate.getFullYear() + '-'
-          + ((currentDate.getMonth() + 1) < 10 ? '0' + (currentDate.getMonth() + 1) : (currentDate.getMonth() + 1))
-          + '-' + (currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate());
+          + (currentDate.getMonth() + 1).padStart(2, '0')
+          + '-' + currentDate.getDate().padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryPlate(visitante.name, visitante.number, visitante.type);
