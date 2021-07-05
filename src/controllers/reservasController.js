@@ -12,7 +12,7 @@ router.get('/getReservas', (req, res) => {
     if(err)
       return res.status(400).send({ err: err });
     else {
-      db.query('SELECT * FROM reserva_ambientes',
+      db.query('SELECT * FROM reserva_ambientes ORDER BY uid desc',
       [],
       (err, reserva) => {
         if(err)

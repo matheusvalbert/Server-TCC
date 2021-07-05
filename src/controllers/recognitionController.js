@@ -5,8 +5,25 @@ const fs = require('fs');
 const path = require('path').join(__dirname, '..', '/img/');
 const faceRecognition = require('../recognition/initFace');
 const plateRecognition = require('../recognition/initPlate');
-
 const baseURL = 'http://localhost:3333/recognition/profileImage/';
+
+var faceUpdate = 400;
+var faceName = '';
+var faceNumber = '';
+var plateUpdate = 400;
+var plateName = '';
+var plateNumber = '';
+
+function getDate() {
+  var today = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0');
+  var yyyy = today.getFullYear();
+  var hh = String(today.getHours()).padStart(2, '0');
+  var min = String(today.getMinutes()).padStart(2, '0');
+  today = dd + '/' + mm + '/' + yyyy + '-' + hh + ':' + min;
+  return today;
+}
 
 function weekDay() {
   var d = new Date();
@@ -29,6 +46,44 @@ function isToday(someDate) {
     someDate.getFullYear() == today.getFullYear()
 }
 
+function addHistoryFace(name, number , type) {
+  var currentTime = (new Date().getTime()) / 1000;
+  if (currentTime - faceUpdate >= 300) {
+    faceName = '';
+    faceNumber = '';
+  }
+  if(faceName !== name || faceNumber !== number) {
+    faceName = name;
+    faceNumber = number;
+    db.query('INSERT INTO history (name, date, number, type) VALUES (?, ?, ?, ?)',
+    [name, getDate(), number, type],
+    (err, result) => {
+      if(err)
+        console.log(err);
+    });
+    faceUpdate = (new Date().getTime()) / 1000;
+  }
+}
+
+function addHistoryPlate(name, number , type) {
+  var currentTime = (new Date().getTime()) / 1000;
+  if (currentTime - plateUpdate >= 300) {
+    plateName = '';
+    plateNumber = '';
+  }
+  if(plateName !== name || plateNumber !== number) {
+    plateName = name;
+    plateNumber = number;
+    db.query('INSERT INTO history (name, date, number, type) VALUES (?, ?, ?, ?)',
+    [name, getDate(), number, type],
+    (err, result) => {
+      if(err)
+        console.log(err);
+    });
+    plateUpdate = (new Date().getTime()) / 1000;
+  }
+}
+
 async function checkMoradorFace(image) {
 
   const result = await new Promise((resolve, reject) => {
@@ -39,6 +94,7 @@ async function checkMoradorFace(image) {
         reject({ error: err });
       else {
         if(result.length > 0) {
+          addHistoryFace(result[0].name, result[0].number, 'Morador');
           resolve({
             imageName: baseURL + image,
             name: result[0].name,
@@ -66,6 +122,7 @@ async function checkMoradorPlate(plate) {
         reject({ error: err });
       else {
         if(result.length > 0) {
+          addHistoryPlate(result[0].name, result[0].number, 'Morador');
           resolve({
             imageName: baseURL + result[0].img_name,
             name: result[0].name,
@@ -97,7 +154,8 @@ async function checkVisitanteFace(image) {
         if(result.length > 0) {
           resolve({
             uid: result[0].uid,
-            imageName: image, name: result[0].name,
+            imageName: baseURL + image,
+            name: result[0].name,
             type: 'Visitante',
             number: result[0].number
           });
@@ -271,8 +329,9 @@ router.post('/face', (req, res) => {
           + '-' + (currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate());
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
+            addHistoryFace(visitante.name, visitante.number, visitante.type);
             return res.send({
-              imageName: baseURL + visitante.imageName,
+              imageName: visitante.imageName,
               type: visitante.type,
               name: visitante.name,
               number: visitante.number,
@@ -281,7 +340,7 @@ router.post('/face', (req, res) => {
           }
           else {
             return res.send({
-              imageName: baseURL + visitante.imageName,
+              imageName: visitante.imageName,
               type: visitante.type,
               name: visitante.name,
               number: visitante.number,
@@ -290,8 +349,9 @@ router.post('/face', (req, res) => {
           }
         }
         else {
+          addHistoryFace(visitante.name, visitante.number, visitante.type);
           return res.send({
-            imageName: baseURL + visitante.imageName,
+            imageName: visitante.imageName,
             type: visitante.type,
             name: visitante.name,
             number: visitante.number,
@@ -326,8 +386,9 @@ router.post('/plate', (req, res) => {
           + '-' + (currentDate.getDate() < 10 ? '0' + currentDate.getDate() : currentDate.getDate());
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
+            addHistoryPlate(visitante.name, visitante.number, visitante.type);
             return res.send({
-              imageName: baseURL + visitante.imageName,
+              imageName: visitante.imageName,
               type: visitante.type,
               name: visitante.name,
               number: visitante.number,
@@ -337,7 +398,7 @@ router.post('/plate', (req, res) => {
           }
           else {
             return res.send({
-              imageName: baseURL + visitante.imageName,
+              imageName: visitante.imageName,
               type: visitante.type,
               name: visitante.name,
               number: visitante.number,
@@ -347,8 +408,9 @@ router.post('/plate', (req, res) => {
           }
         }
         else {
+          addHistoryPlate(visitante.name, visitante.number, visitante.type);
           return res.send({
-            imageName: baseURL + visitante.imageName,
+            imageName: visitante.imageName,
             type: visitante.type,
             name: visitante.name,
             number: visitante.number,
