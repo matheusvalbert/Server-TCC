@@ -32,15 +32,15 @@ def addFace(file):
     except:
         pass
 
-try:
-    for file in os.listdir('./src/img'):
-        if not file.startswith('.'):
+for file in os.listdir('./src/img'):
+    if not file.startswith('.'):
+        try:
             img = cv2.imread('./src/img/' + file)
             img_enc = face_recognition.face_encodings(img)[0]
             knownEncodings.append(img_enc)
             knownNames.append(file)
-except:
-    pass
+        except:
+            pass
 
 while True:
     jsonFile = input()
@@ -66,6 +66,7 @@ while True:
                 if matches[bestMatchIndex]:
                     name = knownNames[bestMatchIndex]
             print(name)
+
     elif newFace != 'false':
         try:
             addFace(newFace)
