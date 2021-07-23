@@ -20,9 +20,10 @@ router.post('/newNotification', (req, res) => {
     const number = req.body.number;
     const type = req.body.type;
     const notification = req.body.notification;
+    const visitor = req.body.visitor;
 
     db.query('INSERT INTO notificacao (number, type, notification, visitor) VALUES (?, ?, ?, ?)',
-    [number, type, notification, null],
+    [number, type, notification, visitor],
     (err, result) => {
       if(err)
         return res.status(400).send({ err: err });
