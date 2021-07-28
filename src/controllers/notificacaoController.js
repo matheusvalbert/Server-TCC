@@ -1,8 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/mysql');
+const admin = require('../database/cloudMessaging');
 const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
+
+function sendMessage(number, title, body) {
+  db.query('SELECT * FROM users WHERE number = ?',
+  [number],
+  (err, list) => {
+    if(err)
+      console.log(err);
+    else {
+      const registrationTokens = [];
+      list.forEach(item => {
+        if(item.token !== null)
+          registrationTokens.push(item.token);
+      });
+      admin.messaging().sendToDevice(
+        registrationTokens,
+        {
+          notification: {
+            title: title,
+            body: body,
+          },
+        },
+        {
+          priority: 'high',
+        },
+      );
+    }
+  });
+}
 
 function getDate() {
   var today = new Date();
@@ -28,6 +57,7 @@ router.post('/newNotification', (req, res) => {
       if(err)
         return res.status(400).send({ err: err });
       else {
+        sendMessage(number, 'Nova notificacao', notification);
         return res.send({ notification: true });
       }
     });
@@ -45,6 +75,7 @@ router.post('/newVisitor', (req, res) => {
     if(err)
       return res.status(400).send({ err: err });
     else {
+      sendMessage(number, 'Nova visita', visitor + ' acabou de chegar, aguardando autorizacao de entrada');
       return res.send({ notification: true });
     }
   });

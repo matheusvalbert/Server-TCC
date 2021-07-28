@@ -200,7 +200,7 @@ router.patch('/reset', (req, res) => {
     else
       if(!await bcrypt.compare(oldPassword, result[0].password))
         return res.status(400).send({ error: 'Senha incorreta' });
-      else
+      else {
         bcrypt.hash(newPassword, 10).then((psw) => {
           db.query('UPDATE users SET password = ? WHERE uid = ?',
           [psw, req.userId],
@@ -211,11 +211,37 @@ router.patch('/reset', (req, res) => {
               return res.send({ passwordChanged: true });
           });
         });
-  })
-})
+      }
+  });
+});
 
 router.post('/validate', (req, res) => {
   return res.send({ validToken: 'true', uid: req.userId });
-})
+});
+
+router.patch('/setToken', (req, res) => {
+
+  const token = req.body.token;
+
+  db.query('UPDATE users SET token = ? WHERE uid = ?',
+  [token, req.userId],
+  (err, result) => {
+    if(err)
+      return res.status(400).send({ error: 'fail to setToken' });
+    else
+      return res.send({ setToken: true });
+  });
+});
+
+router.delete('/deleteToken', (req, res) => {
+  db.query('UPDATE users SET token = ? WHERE uid = ?',
+  [null, req.userId],
+  (err, result) => {
+    if(err)
+      return res.status(400).send({ error: 'fail to setToken' });
+    else
+      return res.send({ setToken: true });
+  });
+});
 
 module.exports = app => app.use('/auth', router);

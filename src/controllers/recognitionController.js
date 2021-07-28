@@ -14,6 +14,34 @@ var plateUpdate = 400;
 var plateName = '';
 var plateNumber = '';
 
+function sendMessage(number, title, body) {
+  db.query('SELECT * FROM users WHERE number = ?',
+  [number],
+  (err, list) => {
+    if(err)
+      console.log(err);
+    else {
+      const registrationTokens = [];
+      list.forEach(item => {
+        if(item.token !== null)
+          registrationTokens.push(item.token);
+      });
+      admin.messaging().sendToDevice(
+        registrationTokens,
+        {
+          notification: {
+            title: title,
+            body: body,
+          },
+        },
+        {
+          priority: 'high',
+        },
+      );
+    }
+  });
+}
+
 function getDate() {
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
@@ -330,6 +358,7 @@ router.post('/face', (req, res) => {
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryFace(visitante.name, visitante.number, visitante.type);
+            sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -350,6 +379,7 @@ router.post('/face', (req, res) => {
         }
         else {
           addHistoryFace(visitante.name, visitante.number, visitante.type);
+          sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
@@ -387,6 +417,7 @@ router.post('/plate', (req, res) => {
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryPlate(visitante.name, visitante.number, visitante.type);
+            sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -409,6 +440,7 @@ router.post('/plate', (req, res) => {
         }
         else {
           addHistoryPlate(visitante.name, visitante.number, visitante.type);
+          sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
