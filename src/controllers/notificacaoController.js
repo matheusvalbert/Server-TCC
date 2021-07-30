@@ -107,14 +107,16 @@ router.get('/authorizedVisitors', (req, res) => {
       const number = [];
       const name = [];
       const date = [];
+      const authorized = []
 
       result.forEach(result => {
         number.push(result.number);
         name.push(result.name);
         date.push(result.date);
+        authorized.push(result.authorized);
       });
 
-      return res.send({ number: number, name: name, date: date });
+      return res.send({ number: number, name: name, date: date, authorized: authorized });
     }
   })
 });
