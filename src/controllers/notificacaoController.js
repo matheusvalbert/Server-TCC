@@ -5,7 +5,7 @@ const admin = require('../database/cloudMessaging');
 const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
 
-function sendMessage(number, title, body) {
+function sendMessage(uid, number, type, notification,visitor, title, body) {
   db.query('SELECT * FROM users WHERE number = ?',
   [number],
   (err, list) => {
@@ -23,6 +23,13 @@ function sendMessage(number, title, body) {
           notification: {
             title: title,
             body: body,
+          },
+          data: {
+            uid: uid.toString(),
+            number: number.toString(),
+            type: type,
+            notification: notification,
+            visitor: visitor,
           },
         },
         {
@@ -57,7 +64,7 @@ router.post('/newNotification', (req, res) => {
       if(err)
         return res.status(400).send({ err: err });
       else {
-        sendMessage(number, 'Nova notificacao', notification);
+        sendMessage(result.insertId, number, 'notification', notification, '', 'Nova notificacao', notification);
         return res.send({ notification: true });
       }
     });
@@ -75,7 +82,7 @@ router.post('/newVisitor', (req, res) => {
     if(err)
       return res.status(400).send({ err: err });
     else {
-      sendMessage(number, 'Nova visita', visitor + ' acabou de chegar, aguardando autorizacao de entrada');
+      sendMessage(result.insertId, number, 'visitor', '', visitor, 'Novo visitante', visitor + ' acabou de chegar, aguardando autorização de entrada');
       return res.send({ notification: true });
     }
   });

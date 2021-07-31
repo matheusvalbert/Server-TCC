@@ -6,6 +6,7 @@ const path = require('path').join(__dirname, '..', '/img/');
 const faceRecognition = require('../recognition/initFace');
 const plateRecognition = require('../recognition/initPlate');
 const baseURL = 'http://localhost:3333/recognition/profileImage/';
+const admin = require('../database/cloudMessaging');
 
 var faceUpdate = 400;
 var faceName = '';
@@ -32,6 +33,13 @@ function sendMessage(number, title, body) {
           notification: {
             title: title,
             body: body,
+          },
+          data: {
+            uid: '',
+            number: '',
+            type: '',
+            notification: '',
+            visitor: '',
           },
         },
         {
@@ -353,12 +361,13 @@ router.post('/face', (req, res) => {
         if(visita === false) {
           var currentDate = new Date();
           var dateTime = currentDate.getFullYear() + '-'
-          + (currentDate.getMonth() + 1).padStart(2, '0')
-          + '-' + currentDate.getDate().padStart(2, '0');
+          + String((currentDate.getMonth() + 1)).padStart(2, '0')
+          + '-' + String(currentDate.getDate()).padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryFace(visitante.name, visitante.number, visitante.type);
-            sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
+            if(faceName !== visitante.name && faceNumber !== visitante.number)
+              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -379,7 +388,8 @@ router.post('/face', (req, res) => {
         }
         else {
           addHistoryFace(visitante.name, visitante.number, visitante.type);
-          sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
+          if(faceName !== visitante.name && faceNumber !== visitante.number)
+              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
@@ -412,12 +422,13 @@ router.post('/plate', (req, res) => {
         if(visita === false) {
           var currentDate = new Date();
           var dateTime = currentDate.getFullYear() + '-'
-          + (currentDate.getMonth() + 1).padStart(2, '0')
-          + '-' + currentDate.getDate().padStart(2, '0');
+          + String((currentDate.getMonth() + 1)).padStart(2, '0')
+          + '-' + String(currentDate.getDate()).padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
             addHistoryPlate(visitante.name, visitante.number, visitante.type);
-            sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
+            if(faceName !== visitante.name && faceNumber !== visitante.number)
+              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -440,7 +451,8 @@ router.post('/plate', (req, res) => {
         }
         else {
           addHistoryPlate(visitante.name, visitante.number, visitante.type);
-          sendMessage(number, 'Nova visita', visitor + ' acabou de entrar no condominio');
+          if(faceName !== visitante.name && faceNumber !== visitante.number)
+              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
