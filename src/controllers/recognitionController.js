@@ -82,12 +82,15 @@ function isToday(someDate) {
     someDate.getFullYear() == today.getFullYear()
 }
 
-function addHistoryFace(name, number , type) {
+function clearFace() {
   var currentTime = (new Date().getTime()) / 1000;
   if (currentTime - faceUpdate >= 300) {
     faceName = '';
     faceNumber = '';
   }
+}
+
+function addHistoryFace(name, number , type) {
   if(faceName !== name || faceNumber !== number) {
     faceName = name;
     faceNumber = number;
@@ -101,12 +104,15 @@ function addHistoryFace(name, number , type) {
   }
 }
 
-function addHistoryPlate(name, number , type) {
+function clearPlate() {
   var currentTime = (new Date().getTime()) / 1000;
   if (currentTime - plateUpdate >= 300) {
     plateName = '';
     plateNumber = '';
   }
+}
+
+function addHistoryPlate(name, number , type) {
   if(plateName !== name || plateNumber !== number) {
     plateName = name;
     plateNumber = number;
@@ -130,6 +136,7 @@ async function checkMoradorFace(image) {
         reject({ error: err });
       else {
         if(result.length > 0) {
+          clearFace();
           addHistoryFace(result[0].name, result[0].number, 'Morador');
           resolve({
             imageName: baseURL + image,
@@ -158,6 +165,7 @@ async function checkMoradorPlate(plate) {
         reject({ error: err });
       else {
         if(result.length > 0) {
+          clearPlate();
           addHistoryPlate(result[0].name, result[0].number, 'Morador');
           resolve({
             imageName: baseURL + result[0].img_name,
@@ -365,9 +373,10 @@ router.post('/face', (req, res) => {
           + '-' + String(currentDate.getDate()).padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
-            addHistoryFace(visitante.name, visitante.number, visitante.type);
-            if(faceName !== visitante.name && faceNumber !== visitante.number)
+            clearFace();
+            if(faceName !== visitante.name || faceNumber !== visitante.number)
               sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
+            addHistoryFace(visitante.name, visitante.number, visitante.type);
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -387,9 +396,10 @@ router.post('/face', (req, res) => {
           }
         }
         else {
+          clearFace();
+          if(faceName !== visitante.name || faceNumber !== visitante.number)
+            sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           addHistoryFace(visitante.name, visitante.number, visitante.type);
-          if(faceName !== visitante.name && faceNumber !== visitante.number)
-              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
@@ -404,6 +414,7 @@ router.post('/face', (req, res) => {
 });
 
 router.post('/plate', (req, res) => {
+
   const plate = req.body.plate;
 
   plateRecognition.stdin.write(`{"plate": "${plate}"}\n`);
@@ -426,9 +437,10 @@ router.post('/plate', (req, res) => {
           + '-' + String(currentDate.getDate()).padStart(2, '0');
           const reserva = await checkReserva(visitante.uid, dateTime);
           if(reserva !== false) {
-            addHistoryPlate(visitante.name, visitante.number, visitante.type);
-            if(faceName !== visitante.name && faceNumber !== visitante.number)
+            clearPlate();
+            if(plateName !== visitante.name || plateNumber !== visitante.number)
               sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
+            addHistoryPlate(visitante.name, visitante.number, visitante.type);
             return res.send({
               imageName: visitante.imageName,
               type: visitante.type,
@@ -450,9 +462,10 @@ router.post('/plate', (req, res) => {
           }
         }
         else {
+          clearPlate();
+          if(plateName !== visitante.name || plateNumber !== visitante.number)
+            sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           addHistoryPlate(visitante.name, visitante.number, visitante.type);
-          if(faceName !== visitante.name && faceNumber !== visitante.number)
-              sendMessage(visitante.number, 'Nova visita', visitante.name + ' acabou de entrar no condominio');
           return res.send({
             imageName: visitante.imageName,
             type: visitante.type,
