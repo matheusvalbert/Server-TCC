@@ -4,6 +4,9 @@ const db = require('../database/mysql');
 const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
 
+router.use(authMiddleware);
+router.use(userMiddleware);
+
 router.get('/getReservas', (req, res) => {
 
   db.query('SELECT * FROM ambientes',
@@ -35,9 +38,6 @@ router.get('/getReservas', (req, res) => {
     }
   });
 });
-
-router.use(authMiddleware);
-router.use(userMiddleware);
 
 router.post('/addLocal', (req, res) => {
 

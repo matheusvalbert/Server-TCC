@@ -7,6 +7,22 @@ const faceRecognition = require('../recognition/initFace');
 const plateRecognition = require('../recognition/initPlate');
 const baseURL = 'http://localhost:3333/recognition/profileImage/';
 const admin = require('../database/cloudMessaging');
+const authMiddleware = require('../middlewares/auth');
+
+router.get('/profileImage/:imgName', (req, res) => {
+
+  try {
+    if (fs.existsSync(path + req.params.imgName)) {
+
+      return res.sendFile(path + req.params.imgName);
+    }
+  } catch(err) {
+
+    return res.status(400).send({ error: err });
+  }
+});
+
+router.use(authMiddleware);
 
 var faceUpdate = 400;
 var faceName = '';
@@ -478,19 +494,6 @@ router.post('/plate', (req, res) => {
       }
     }
   });
-});
-
-router.get('/profileImage/:imgName', (req, res) => {
-
-  try {
-    if (fs.existsSync(path + req.params.imgName)) {
-
-      return res.sendFile(path + req.params.imgName);
-    }
-  } catch(err) {
-
-    return res.status(400).send({ error: err });
-  }
 });
 
 module.exports = app => app.use('/recognition', router);

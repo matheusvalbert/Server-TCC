@@ -5,6 +5,9 @@ const admin = require('../database/cloudMessaging');
 const authMiddleware = require('../middlewares/auth');
 const userMiddleware = require('../middlewares/user');
 
+router.use(authMiddleware);
+router.use(userMiddleware);
+
 function sendMessage(uid, number, type, notification,visitor, title, body) {
   db.query('SELECT * FROM users WHERE number = ?',
   [number],
@@ -127,9 +130,6 @@ router.get('/authorizedVisitors', (req, res) => {
     }
   })
 });
-
-router.use(authMiddleware);
-router.use(userMiddleware);
 
 router.get('/getNotification', (req, res) => {
 
