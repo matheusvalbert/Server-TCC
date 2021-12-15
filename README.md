@@ -41,3 +41,9 @@ O sistema é dividido em duas frentes morador e porteiro/administrador.
 yarn install
 yarn start
 ```
+
+# Outros repositórios do projeto
+
+- Placas: https://github.com/matheusvalbert/Placas-TCC
+- Desktop: https://github.com/matheusvalbert/Desktop-TCC
+- Mobile: https://github.com/matheusvalbert/Mobile-TCC
